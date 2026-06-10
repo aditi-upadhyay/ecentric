@@ -1,0 +1,43 @@
+.detail-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.back-link {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 1;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+
+  &:hover {
+    color: rgba(0, 0, 0, 0.9);
+  }
+}
+
+.detail-title {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.canvas-container {
+  flex: 1;
+  width: 100%;
+}

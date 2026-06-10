@@ -5,15 +5,12 @@ import {
   OnDestroy,
   ViewChild,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { shapeFragmentShader, shapeVertexShader } from '../shaders/shape.shader';
-declare var window: any;
-interface ShapeConfig {
-  geometry: THREE.BufferGeometry;
-  color: THREE.ColorRepresentation;
-  position: THREE.Vector3;
-}
+import { createShaderMesh, disposeMesh } from '../shapes/shape-mesh.factory';
+import { SHAPES, ShapeId } from '../shapes/shape.models';
+
 
 @Component({
   selector: 'app-shapes-scene',
@@ -29,34 +26,39 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
   private renderer!: THREE.WebGLRenderer;
   private controls!: OrbitControls;
   private meshes: THREE.Mesh[] = [];
+  private raycaster = new THREE.Raycaster();
+  private pointer = new THREE.Vector2();
   private animationId = 0;
   /** Seconds elapsed since the render loop started; passed to shader `uTime` for animation. */
   private elapsedTime = 0;
+  private pointerDownX = 0;
+  private pointerDownY = 0;
   private readonly onResize = () => this.handleResize();
+  private readonly onPointerDown = (event: PointerEvent) => {
+    this.pointerDownX = event.clientX;
+    this.pointerDownY = event.clientY;
+  };
+  private readonly onPointerUp = (event: PointerEvent) => this.handleClick(event);
 
-  constructor() {
-    // Expose instance on window for debugging in the browser console.
-    window.obj = this;
-  }
+  constructor(private router: Router) {}
 
-  // ViewChild is available here — WebGL needs the container element in the DOM.
   ngAfterViewInit(): void {
     this.initScene();
     this.createShapes();
     this.handleResize();
     window.addEventListener('resize', this.onResize);
+    this.renderer.domElement.addEventListener('pointerdown', this.onPointerDown);
+    this.renderer.domElement.addEventListener('pointerup', this.onPointerUp);
     this.animate();
   }
 
-  // WebGL geometries, materials, and the renderer hold GPU memory; dispose explicitly.
   ngOnDestroy(): void {
     cancelAnimationFrame(this.animationId);
     window.removeEventListener('resize', this.onResize);
+    this.renderer?.domElement.removeEventListener('pointerdown', this.onPointerDown);
+    this.renderer?.domElement.removeEventListener('pointerup', this.onPointerUp);
     this.controls?.dispose();
-    this.meshes.forEach((mesh) => {
-      mesh.geometry.dispose();
-      (mesh.material as THREE.ShaderMaterial).dispose();
-    });
+    this.meshes.forEach((mesh) => disposeMesh(mesh));
     this.renderer?.dispose();
   }
 
@@ -82,58 +84,43 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
   }
 
   private createShapes(): void {
-    const shapes: ShapeConfig[] = [
-      {
-        geometry: new THREE.SphereGeometry(0.8, 32, 32),
-        color: '#cb8ead',
-        position: new THREE.Vector3(-4.5, 0, 0),
-      },
-      {
-        geometry: new THREE.BoxGeometry(1.2, 1.2, 1.2),
-        color: "#dadea3",
-        position: new THREE.Vector3(-1.5, 0, 0),
-      },
-      {
-        geometry: new THREE.ConeGeometry(0.8, 1.5, 32),
-        color: "#a5685b",
-        position: new THREE.Vector3(1.5, 0, 0),
-      },
-      {
-        geometry: new THREE.TorusGeometry(0.7, 0.3, 32, 64),
-        color: '#f472b6',
-        position: new THREE.Vector3(4.5, 0, 0),
-      },
-    ];
-
-    shapes.forEach((config) => {
-      const mesh = this.createShaderMesh(
-        config.geometry,
-        config.color,
-        config.position,
+    SHAPES.forEach((shape) => {
+      const mesh = createShaderMesh(
+        shape.createGeometry(),
+        shape.color,
+        shape.position,
       );
+      mesh.userData['shapeId'] = shape.id;
       this.scene.add(mesh);
       this.meshes.push(mesh);
     });
   }
 
-  private createShaderMesh(
-    geometry: THREE.BufferGeometry,
-    color: THREE.ColorRepresentation,
-    position: THREE.Vector3,
-  ): THREE.Mesh {
-    // Uniforms are read in shape.shader.ts (fresnel rim + time-based pulse).
-    const material = new THREE.ShaderMaterial({
-      vertexShader: shapeVertexShader,
-      fragmentShader: shapeFragmentShader,
-      uniforms: {
-        uColor: { value: new THREE.Color(color) },
-        uTime: { value: 0 },
-      },
-    });
+  private handleClick(event: PointerEvent): void {
+    const dx = event.clientX - this.pointerDownX;
+    const dy = event.clientY - this.pointerDownY;
 
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.copy(position);
-    return mesh;
+    if (Math.sqrt(dx * dx + dy * dy) > 5) {
+      return;
+    }
+
+    const canvas = this.renderer.domElement;
+    const rect = canvas.getBoundingClientRect();
+
+    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    const hits = this.raycaster.intersectObjects(this.meshes);
+
+    if (hits.length === 0) {
+      return;
+    }
+
+    const shapeId = hits[0].object.userData['shapeId'] as ShapeId | undefined;
+    if (shapeId) {
+      this.router.navigate(['/shape', shapeId]);
+    }
   }
 
   private handleResize(): void {
@@ -149,7 +136,6 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
   private animate = (): void => {
     this.animationId = requestAnimationFrame(this.animate);
 
-    // ~16 ms per frame (60 fps). Drives `sin(uTime)` pulse in the fragment shader.
     this.elapsedTime += 0.016;
     this.meshes.forEach((mesh) => {
       (mesh.material as THREE.ShaderMaterial).uniforms['uTime'].value =

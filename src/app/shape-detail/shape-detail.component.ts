@@ -30,7 +30,6 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
   private controls!: OrbitControls;
   private mesh: THREE.Mesh | null = null;
   private animationId = 0;
-  private elapsedTime = 0;
   private readonly onResize = () => this.handleResize();
 
   constructor(
@@ -109,13 +108,6 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
 
   private animate = (): void => {
     this.animationId = requestAnimationFrame(this.animate);
-
-    this.elapsedTime += 0.016;
-    if (this.mesh) {
-      (this.mesh.material as THREE.ShaderMaterial).uniforms['uTime'].value =
-        this.elapsedTime;
-    }
-
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   };

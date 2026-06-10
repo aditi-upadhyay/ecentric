@@ -11,7 +11,6 @@ export function createShaderMesh(
     fragmentShader: shapeFragmentShader,
     uniforms: {
       uColor: { value: new THREE.Color(color) },
-      uTime: { value: 0 },
     },
   });
 

@@ -29,8 +29,6 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
   private raycaster = new THREE.Raycaster();
   private pointer = new THREE.Vector2();
   private animationId = 0;
-  /** Seconds elapsed since the render loop started; passed to shader `uTime` for animation. */
-  private elapsedTime = 0;
   private pointerDownX = 0;
   private pointerDownY = 0;
   private readonly onResize = () => this.handleResize();
@@ -135,13 +133,6 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
 
   private animate = (): void => {
     this.animationId = requestAnimationFrame(this.animate);
-
-    this.elapsedTime += 0.016;
-    this.meshes.forEach((mesh) => {
-      (mesh.material as THREE.ShaderMaterial).uniforms['uTime'].value =
-        this.elapsedTime;
-    });
-
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   };

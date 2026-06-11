@@ -5,6 +5,8 @@ export type ShapeId = 'sphere' | 'cube' | 'cone' | 'torus';
 export interface ShapeDefinition {
   id: ShapeId;
   label: string;
+  cardLabel: string;
+  imageUrl: string;
   color: THREE.ColorRepresentation;
   metalness: number;
   roughness: number;
@@ -20,6 +22,8 @@ export const SHAPES: ShapeDefinition[] = [
   {
     id: 'sphere',
     label: 'Sphere',
+    cardLabel: '01_PRIMARY_SPHERE',
+    imageUrl: 'assets/sphere.png',
     color: '#cb8ead',
     metalness: 0.15,
     roughness: 0.25,
@@ -33,6 +37,8 @@ export const SHAPES: ShapeDefinition[] = [
   {
     id: 'cube',
     label: 'Cube',
+    cardLabel: '02_PRISM_CUBE_X',
+    imageUrl: 'assets/cube.png',
     color: '#dadea3',
     metalness: 0.1,
     roughness: 0.35,
@@ -46,6 +52,8 @@ export const SHAPES: ShapeDefinition[] = [
   {
     id: 'cone',
     label: 'Cone',
+    cardLabel: '03_TAPER_CONE',
+    imageUrl: 'assets/cone.png',
     color: '#a5685b',
     metalness: 0.12,
     roughness: 0.3,
@@ -59,6 +67,8 @@ export const SHAPES: ShapeDefinition[] = [
   {
     id: 'torus',
     label: 'Donut',
+    cardLabel: '04_TORUS_PRIMITIVE',
+    imageUrl: 'assets/torus.png',
     color: '#f472b6',
     metalness: 0.2,
     roughness: 0.28,

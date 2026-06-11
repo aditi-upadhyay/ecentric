@@ -32,6 +32,13 @@ uniform float steepness;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 
+// Sigmoid/S-curve remapping for smoother, more natural color falloff
+float sigmoidInterp(float t, float k) {
+  t = clamp(t, 0.0, 1.0);
+  float steep = max(k, 0.01) * 10.0;
+  return 1.0 / (1.0 + exp(-steep * (t - 0.5)));
+}
+
 void main() {
   vec3 normal = normalize(vNormal);
   vec3 viewDir = normalize(cameraPosition - vWorldPosition);
@@ -39,10 +46,9 @@ void main() {
   float fresnel = pow(1.0 - dot(viewDir, normal), edgeAttenuation);
   fresnel = pow(fresnel, steepness);
 
-  // Sharpen blend so pink + green never pass through muddy yellow mid-tones
   float rimBlend = clamp(fresnel * fresnelStrength, 0.0, 1.0);
-  rimBlend = rimBlend * rimBlend;
-  vec3 finalColor = mix(baseColor, edgeColor, rimBlend);
+  float sigmoidBlend = sigmoidInterp(rimBlend, steepness);
+  vec3 finalColor = mix(baseColor, edgeColor, sigmoidBlend);
 
   gl_FragColor = vec4(finalColor, 1.0);
   #include <tonemapping_fragment>

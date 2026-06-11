@@ -36,18 +36,28 @@
     </div>
 
     <div class="dashboard-widgets">
-      <div class="widget-left">
-        <app-project-intent
-          [title]="projectIntentTitle"
-          [quote]="projectIntentQuote"
-          [listSections]="projectIntentSections">
-        </app-project-intent>
+      <div class="widget-row">
+        <div class="widget-left">
+          <app-project-intent
+            [title]="projectIntentTitle"
+            [quote]="projectIntentQuote"
+            [listSections]="projectIntentSections">
+          </app-project-intent>
+        </div>
+        <div class="widget-right">
+          <app-checklist
+            [title]="todoTitle"
+            [tasks]="todoTasks">
+          </app-checklist>
+        </div>
       </div>
-      <div class="widget-right">
-        <app-checklist
-          [title]="todoTitle"
-          [tasks]="todoTasks">
-        </app-checklist>
+      <div class="widget-row">
+        <div class="widget-left">
+          <app-observation></app-observation>
+        </div>
+        <div class="widget-right">
+          <app-profile-card></app-profile-card>
+        </div>
       </div>
     </div>
   </div>

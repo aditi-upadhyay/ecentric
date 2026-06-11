@@ -8,6 +8,8 @@ import { ShapesSceneComponent } from './shapes-scene/shapes-scene.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ProjectIntentComponent } from './project-intent/project-intent.component';
 import { ChecklistComponent } from './checklist/checklist.component';
+import { ObservationComponent } from './observation/observation.component';
+import { ProfileCardComponent } from './profile-card/profile-card.component';
 
 @NgModule({
   declarations: [
@@ -16,6 +18,8 @@ import { ChecklistComponent } from './checklist/checklist.component';
     ShapeDetailComponent,
     ProjectIntentComponent,
     ChecklistComponent,
+    ObservationComponent,
+    ProfileCardComponent,
   ],
   imports: [
     BrowserModule,

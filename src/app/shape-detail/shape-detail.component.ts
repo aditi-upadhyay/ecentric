@@ -8,7 +8,13 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { createShaderMesh, disposeMesh } from '../shapes/shape-mesh.factory';
+import {
+  addPbrLights,
+  configurePbrRenderer,
+  createPbrEnvironment,
+  disposePbrEnvironment,
+} from '../shapes/pbr-scene.setup';
+import { createPbrMesh, disposeMesh } from '../shapes/shape-mesh.factory';
 import { getShapeById } from '../shapes/shape.models';
 
 declare const window: Window & { devicePixelRatio: number };
@@ -29,6 +35,8 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
   private renderer!: THREE.WebGLRenderer;
   private controls!: OrbitControls;
   private mesh: THREE.Mesh | null = null;
+  private envMap!: THREE.Texture;
+  private pmrem!: THREE.PMREMGenerator;
   private animationId = 0;
   private readonly onResize = () => this.handleResize();
 
@@ -61,6 +69,9 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
     if (this.mesh) {
       disposeMesh(this.mesh);
     }
+    if (this.envMap && this.pmrem) {
+      disposePbrEnvironment(this.envMap, this.pmrem);
+    }
     this.renderer?.dispose();
   }
 
@@ -75,7 +86,14 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
+    configurePbrRenderer(this.renderer);
     container.appendChild(this.renderer.domElement);
+
+    const pbrEnv = createPbrEnvironment(this.renderer);
+    this.envMap = pbrEnv.envMap;
+    this.pmrem = pbrEnv.pmrem;
+    this.scene.environment = this.envMap;
+    addPbrLights(this.scene);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
@@ -88,10 +106,11 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    this.mesh = createShaderMesh(
+    this.mesh = createPbrMesh(
       shape.createGeometry(),
-      shape.color,
+      shape,
       new THREE.Vector3(0, 0, 0),
+      this.envMap,
     );
     this.scene.add(this.mesh);
   }

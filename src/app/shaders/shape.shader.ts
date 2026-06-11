@@ -1,27 +1,33 @@
-export const shapeVertexShader = `
-  varying vec3 vNormal;
-  varying vec3 vViewPosition;
+import * as THREE from 'three';
 
-  void main() {
-    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    vNormal = normalize(normalMatrix * normal);
-    vViewPosition = -mvPosition.xyz;
-    gl_Position = projectionMatrix * mvPosition;
-  }
-`;
+export interface FresnelOptions {
+  edgeColor: THREE.ColorRepresentation;
+  fresnelPower: number;
+  fresnelIntensity: number;
+}
 
-export const shapeFragmentShader = `
-  uniform vec3 uColor;
+export function applyFresnelToPhysicalMaterial(
+  material: THREE.MeshPhysicalMaterial,
+  options: FresnelOptions,
+): void {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms['uEdgeColor'] = { value: new THREE.Color(options.edgeColor) };
+    shader.uniforms['uFresnelPower'] = { value: options.fresnelPower };
+    shader.uniforms['uFresnelIntensity'] = { value: options.fresnelIntensity };
 
-  varying vec3 vNormal;
-  varying vec3 vViewPosition;
+    shader.fragmentShader = `
+      uniform vec3 uEdgeColor;
+      uniform float uFresnelPower;
+      uniform float uFresnelIntensity;
+    ` + shader.fragmentShader;
 
-  void main() {
-    vec3 normal = normalize(vNormal);
-    vec3 viewDir = normalize(vViewPosition);
-    float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 2.0);
-    vec3 rimColor = vec3(1.0);
-    vec3 finalColor = mix(uColor, rimColor, fresnel * 0.6);
-    gl_FragColor = vec4(finalColor, 1.0);
-  }
-`;
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <output_fragment>',
+      `
+        float fresnel = pow(1.0 - saturate(dot(normalize(vNormal), normalize(vViewPosition))), uFresnelPower);
+        outgoingLight = mix(outgoingLight, uEdgeColor, fresnel * uFresnelIntensity);
+        #include <output_fragment>
+      `,
+    );
+  };
+}

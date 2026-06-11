@@ -8,7 +8,13 @@ import {
 import { Router } from '@angular/router';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { createShaderMesh, disposeMesh } from '../shapes/shape-mesh.factory';
+import {
+  addPbrLights,
+  configurePbrRenderer,
+  createPbrEnvironment,
+  disposePbrEnvironment,
+} from '../shapes/pbr-scene.setup';
+import { createPbrMesh, disposeMesh } from '../shapes/shape-mesh.factory';
 import { SHAPES, ShapeId } from '../shapes/shape.models';
 
 
@@ -26,6 +32,8 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
   private renderer!: THREE.WebGLRenderer;
   private controls!: OrbitControls;
   private meshes: THREE.Mesh[] = [];
+  private envMap!: THREE.Texture;
+  private pmrem!: THREE.PMREMGenerator;
   private raycaster = new THREE.Raycaster();
   private pointer = new THREE.Vector2();
   private animationId = 0;
@@ -57,6 +65,9 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
     this.renderer?.domElement.removeEventListener('pointerup', this.onPointerUp);
     this.controls?.dispose();
     this.meshes.forEach((mesh) => disposeMesh(mesh));
+    if (this.envMap && this.pmrem) {
+      disposePbrEnvironment(this.envMap, this.pmrem);
+    }
     this.renderer?.dispose();
   }
 
@@ -72,7 +83,14 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     // Render at native resolution on Retina / high-DPI displays.
     this.renderer.setPixelRatio(window.devicePixelRatio);
+    configurePbrRenderer(this.renderer);
     container.appendChild(this.renderer.domElement);
+
+    const pbrEnv = createPbrEnvironment(this.renderer);
+    this.envMap = pbrEnv.envMap;
+    this.pmrem = pbrEnv.pmrem;
+    this.scene.environment = this.envMap;
+    addPbrLights(this.scene);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     // Damping adds inertia; controls.update() must run every frame (see animate).
@@ -83,10 +101,11 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
 
   private createShapes(): void {
     SHAPES.forEach((shape) => {
-      const mesh = createShaderMesh(
+      const mesh = createPbrMesh(
         shape.createGeometry(),
-        shape.color,
+        shape,
         shape.position,
+        this.envMap,
       );
       mesh.userData['shapeId'] = shape.id;
       this.scene.add(mesh);

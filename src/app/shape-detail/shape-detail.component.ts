@@ -8,8 +8,13 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { configurePbrRenderer } from '../shapes/pbr-scene.setup';
-import { createFresnelMesh, disposeMesh } from '../shapes/shape-mesh.factory';
+import {
+  addPbrLights,
+  configurePbrRenderer,
+  createPbrEnvironment,
+  disposePbrEnvironment,
+} from '../shapes/pbr-scene.setup';
+import { createDetailMesh, disposeDetailMesh } from '../shapes/shape-mesh.factory';
 import { getShapeById, ShapeDefinition } from '../shapes/shape.models';
 
 declare const window: Window & { devicePixelRatio: number };
@@ -24,6 +29,7 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
   canvasContainer!: ElementRef<HTMLDivElement>;
 
   shapeLabel = '';
+  fresnelEnabled = true;
   edgeColorHex = '#0000ff';
   fresnelStrength = 0.5;
   edgeAttenuation = 2.0;
@@ -34,7 +40,10 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
   private renderer!: THREE.WebGLRenderer;
   private controls!: OrbitControls;
   private mesh: THREE.Mesh | null = null;
+  private pbrMaterial: THREE.MeshPhysicalMaterial | null = null;
   private fresnelMaterial: THREE.ShaderMaterial | null = null;
+  private envMap!: THREE.Texture;
+  private pmrem!: THREE.PMREMGenerator;
   private animationId = 0;
   private readonly onResize = () => this.handleResize();
 
@@ -66,9 +75,19 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
     window.removeEventListener('resize', this.onResize);
     this.controls?.dispose();
     if (this.mesh) {
-      disposeMesh(this.mesh);
+      disposeDetailMesh(this.mesh);
+    }
+    if (this.envMap && this.pmrem) {
+      disposePbrEnvironment(this.envMap, this.pmrem);
     }
     this.renderer?.dispose();
+  }
+
+  onFresnelEnabledChange(enabled: boolean): void {
+    if (!this.mesh || !this.pbrMaterial || !this.fresnelMaterial) {
+      return;
+    }
+    this.mesh.material = enabled ? this.fresnelMaterial : this.pbrMaterial;
   }
 
   onEdgeColorChange(hex: string): void {
@@ -114,6 +133,12 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
     configurePbrRenderer(this.renderer);
     container.appendChild(this.renderer.domElement);
 
+    const pbrEnv = createPbrEnvironment(this.renderer);
+    this.envMap = pbrEnv.envMap;
+    this.pmrem = pbrEnv.pmrem;
+    this.scene.environment = this.envMap;
+    addPbrLights(this.scene);
+
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
@@ -121,11 +146,13 @@ export class ShapeDetailComponent implements AfterViewInit, OnDestroy {
   }
 
   private createShape(shape: ShapeDefinition): void {
-    this.mesh = createFresnelMesh(
+    this.mesh = createDetailMesh(
       shape.createGeometry(),
       shape,
       new THREE.Vector3(0, 0, 0),
+      this.envMap,
     );
+    this.pbrMaterial = this.mesh.userData['pbrMaterial'] as THREE.MeshPhysicalMaterial;
     this.fresnelMaterial = this.mesh.userData['fresnelMaterial'] as THREE.ShaderMaterial;
     this.scene.add(this.mesh);
   }

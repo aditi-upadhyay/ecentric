@@ -1,0 +1,30 @@
+<div class="card">
+  <div class="card-header">
+    <div class="header-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      </svg>
+      <h2>{{ title }}</h2>
+    </div>
+  </div>
+
+  <div class="task-list" *ngIf="tasks && tasks.length > 0">
+    <label class="task-item" *ngFor="let task of tasks" [class.completed]="task.completed">
+      <input type="checkbox" [checked]="task.completed" (click)="$event.preventDefault()">
+      <span class="custom-checkbox">
+        <svg *ngIf="task.completed" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </span>
+      <div class="task-details">
+        <span class="task-title">{{ task.title }}</span>
+        <span class="task-meta">{{ task.meta }}</span>
+      </div>
+    </label>
+  </div>
+</div>

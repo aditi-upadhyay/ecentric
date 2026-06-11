@@ -19,6 +19,7 @@
   z-index: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .header {
@@ -121,4 +122,21 @@
   letter-spacing: 0.05em;
 }
 
+.dashboard-widgets {
+  display: flex;
+  gap: 24px;
+  padding: 0 40px;
+  margin-top: 40px;
+  max-width: 1200px;
+  width: 100%;
+}
 
+.widget-left {
+  flex: 2;
+  min-width: 0;
+}
+
+.widget-right {
+  flex: 1;
+  min-width: 320px;
+}

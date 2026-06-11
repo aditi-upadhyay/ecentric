@@ -6,12 +6,16 @@ import { AppComponent } from './app.component';
 import { ShapeDetailComponent } from './shape-detail/shape-detail.component';
 import { ShapesSceneComponent } from './shapes-scene/shapes-scene.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ProjectIntentComponent } from './project-intent/project-intent.component';
+import { ChecklistComponent } from './checklist/checklist.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ShapesSceneComponent,
     ShapeDetailComponent,
+    ProjectIntentComponent,
+    ChecklistComponent,
   ],
   imports: [
     BrowserModule,

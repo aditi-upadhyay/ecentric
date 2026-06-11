@@ -30,5 +30,21 @@
         <div class="card-label">{{ shape.cardLabel }}</div>
       </a>
     </div>
+
+    <div class="dashboard-widgets">
+      <div class="widget-left">
+        <app-project-intent
+          [title]="projectIntentTitle"
+          [quote]="projectIntentQuote"
+          [listSections]="projectIntentSections">
+        </app-project-intent>
+      </div>
+      <div class="widget-right">
+        <app-checklist
+          [title]="todoTitle"
+          [tasks]="todoTasks">
+        </app-checklist>
+      </div>
+    </div>
   </div>
 </div>

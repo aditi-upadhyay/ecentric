@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 
 export interface TodoTask {
   title: string;
-  meta: string;
   completed: boolean;
 }
 

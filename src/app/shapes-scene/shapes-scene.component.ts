@@ -15,28 +15,38 @@ export class ShapesSceneComponent {
   projectIntentQuote = '"Create an interactive 3D scene featuring a Fresnel effect applied to a PBR (Physically Based Rendering) material on a sphere. The effect should be controllable through an interactive UI."';
   projectIntentSections: ListSection[] = [
     {
-      title: 'OPTICAL PROPERTIES',
+      title: 'Fresnel Effect Settings',
       items: [
-        'Index of Refraction: 1.45 (Standard Glass)',
-        'Edge Attenuation: Non-linear decay (0.82)',
-        'Chromatic Aberration: Subtle fringe (+0.02)'
+        'Fresnel Model: View-dependent reflectance (dot(N, V))',
+        'Edge Attenuation: Controls falloff from edge to center',
+        'Steepness: Controls sharpness of transition curve',
+        'Edge Tint: User-defined rim color (RGB controlled)',
       ]
     },
     {
       title: 'STUDIO CONFIGURATION',
       items: [
-        "Environment Map: 'Nordic_Studio_Day'",
-        'Sampling: 64spp with Denoise',
-        'Render Engine: Fresnel V2.1 Core'
+        'Shape: Sphere, Cube, Torus, Cone',
+        'Color: RGB controlled',
+        'Metalness: 0.15-0.25',
+        'Roughness: 0.25-0.35',
+        'Edge Color: RGB controlled',
+        'Edge Attenuation: 2.0',
+        'Fresnel Strength: 0.5',
+        'Steepness: 0.5',
       ]
     }
   ];
 
-  todoTitle = 'Studio To-Do';
+  todoTitle = 'Assignment Checklist';
   todoTasks: TodoTask[] = [
-    { title: 'Calibrate Fresnel Falloff', meta: 'COMPLETED BY ADITI', completed: true },
-    { title: 'Optimize Torus Polycount', meta: 'PRIORITY: HIGH', completed: false },
-    { title: "New 'Iridescent' Preset", meta: 'R&D PHASE', completed: false },
-    { title: 'Export Final GLB Assets', meta: 'PENDING REVIEW', completed: false }
+    { title: 'Apply Fresnel effect using custom shader', completed: true },
+    { title: 'Implement edge color control (color picker)', completed: true },
+    { title: 'Implement edge attenuation (falloff control)', completed: true },
+    { title: "Add steepness control (transition sharpness)", completed: true },
+    { title: "Ensure real-time UI interaction", completed: true },
+    { title: "Support multiple geometries (sphere, cube, torus, cone)", completed: true },
+    { title: "Polish visual output (color blending / mix fix)", completed: true },
+    { title: "Finalize clean UI layout & labeling", completed: true },
   ];
 }

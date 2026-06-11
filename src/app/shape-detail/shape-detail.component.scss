@@ -4,6 +4,7 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+  font-family: 'Inter', sans-serif;
 }
 
 .back-link {
@@ -11,14 +12,14 @@
   top: 24px;
   left: 24px;
   z-index: 1;
-  color: rgba(0, 0, 0, 0.7);
-  font-size: 14px;
+  color: #6b7280;
+  font-size: 15px;
   font-weight: 500;
   text-decoration: none;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 
   &:hover {
-    color: rgba(0, 0, 0, 0.9);
+    color: #111827;
   }
 }
 
@@ -29,11 +30,10 @@
   transform: translateX(-50%);
   z-index: 1;
   margin: 0;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 18px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   pointer-events: none;
 }
 
@@ -44,18 +44,18 @@
   z-index: 1;
   width: 260px;
   padding: 20px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  font-family: 'Inter', sans-serif;
   pointer-events: auto;
 }
 
 .controls-title {
   margin: 0 0 16px;
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 12px;
-  font-weight: 600;
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -82,28 +82,30 @@
   align-items: center;
   padding-bottom: 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .control-checkbox {
   width: 18px;
   height: 18px;
-  accent-color: rgba(0, 0, 0, 0.6);
+  accent-color: #4f46e5;
   cursor: pointer;
+  font-family: inherit;
 }
 
 .control-label {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: rgba(0, 0, 0, 0.7);
-  font-size: 13px;
+  color: #4b5563;
+  font-size: 14px;
   font-weight: 500;
 }
 
 .control-value {
-  color: rgba(0, 0, 0, 0.45);
+  color: #9ca3af;
   font-size: 12px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -123,8 +125,9 @@
 
 .control-range {
   width: 100%;
-  accent-color: rgba(0, 0, 0, 0.6);
+  accent-color: #4f46e5;
   cursor: pointer;
+  font-family: inherit;
 
   &:disabled {
     cursor: not-allowed;

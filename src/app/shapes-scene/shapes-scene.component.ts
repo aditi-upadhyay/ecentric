@@ -14,9 +14,8 @@ import {
   createPbrEnvironment,
   disposePbrEnvironment,
 } from '../shapes/pbr-scene.setup';
-import { createPbrMesh, disposeMesh } from '../shapes/shape-mesh.factory';
+import { createGalleryMesh, disposeMesh } from '../shapes/shape-mesh.factory';
 import { SHAPES, ShapeId } from '../shapes/shape.models';
-
 
 @Component({
   selector: 'app-shapes-scene',
@@ -81,7 +80,6 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
     this.camera.position.set(0, 2, 8);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    // Render at native resolution on Retina / high-DPI displays.
     this.renderer.setPixelRatio(window.devicePixelRatio);
     configurePbrRenderer(this.renderer);
     container.appendChild(this.renderer.domElement);
@@ -93,7 +91,6 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
     addPbrLights(this.scene);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    // Damping adds inertia; controls.update() must run every frame (see animate).
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
     this.controls.target.set(0, 0, 0);
@@ -101,7 +98,7 @@ export class ShapesSceneComponent implements AfterViewInit, OnDestroy {
 
   private createShapes(): void {
     SHAPES.forEach((shape) => {
-      const mesh = createPbrMesh(
+      const mesh = createGalleryMesh(
         shape.createGeometry(),
         shape,
         shape.position,

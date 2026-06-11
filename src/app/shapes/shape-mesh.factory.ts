@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { applyFresnelToPhysicalMaterial } from '../shaders/shape.shader';
+import { createFresnelShaderMaterial } from '../shaders/shape.shader';
 import { ShapeDefinition } from './shape.models';
 
-export function createPbrMesh(
+export function createGalleryMesh(
   geometry: THREE.BufferGeometry,
   shape: ShapeDefinition,
   position: THREE.Vector3,
@@ -16,18 +16,31 @@ export function createPbrMesh(
     envMapIntensity: 1.0,
   });
 
-  applyFresnelToPhysicalMaterial(material, {
-    edgeColor: shape.edgeColor,
-    fresnelPower: shape.fresnelPower,
-    fresnelIntensity: shape.fresnelIntensity,
-  });
-
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.copy(position);
   return mesh;
 }
 
+export function createFresnelMesh(
+  geometry: THREE.BufferGeometry,
+  shape: ShapeDefinition,
+  position: THREE.Vector3,
+): THREE.Mesh {
+  const material = createFresnelShaderMaterial({
+    baseColor: shape.color,
+    edgeColor: shape.edgeColor,
+    fresnelStrength: shape.fresnelStrength,
+    edgeAttenuation: shape.edgeAttenuation,
+    steepness: shape.steepness,
+  });
+
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.copy(position);
+  mesh.userData['fresnelMaterial'] = material;
+  return mesh;
+}
+
 export function disposeMesh(mesh: THREE.Mesh): void {
   mesh.geometry.dispose();
-  (mesh.material as THREE.MeshPhysicalMaterial).dispose();
+  (mesh.material as THREE.Material).dispose();
 }

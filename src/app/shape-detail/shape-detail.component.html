@@ -1,5 +1,68 @@
 <div class="detail-wrapper">
   <a class="back-link" routerLink="/">&larr; Back to all shapes</a>
   <h1 class="detail-title">{{ shapeLabel }}</h1>
+
+  <aside class="controls-panel">
+    <h2 class="controls-title">Fresnel Controls</h2>
+
+    <label class="control">
+      <span class="control-label">Edge Color</span>
+      <input
+        type="color"
+        class="control-color"
+        [(ngModel)]="edgeColorHex"
+        (ngModelChange)="onEdgeColorChange($event)"
+      />
+    </label>
+
+    <label class="control">
+      <span class="control-label">
+        Fresnel Strength
+        <span class="control-value">{{ fresnelStrength | number: '1.2-2' }}</span>
+      </span>
+      <input
+        type="range"
+        class="control-range"
+        min="0"
+        max="1"
+        step="0.01"
+        [(ngModel)]="fresnelStrength"
+        (ngModelChange)="onFresnelStrengthChange($event)"
+      />
+    </label>
+
+    <label class="control">
+      <span class="control-label">
+        Edge Attenuation
+        <span class="control-value">{{ edgeAttenuation | number: '1.1-1' }}</span>
+      </span>
+      <input
+        type="range"
+        class="control-range"
+        min="0.5"
+        max="8"
+        step="0.1"
+        [(ngModel)]="edgeAttenuation"
+        (ngModelChange)="onEdgeAttenuationChange($event)"
+      />
+    </label>
+
+    <label class="control">
+      <span class="control-label">
+        Steepness
+        <span class="control-value">{{ steepness | number: '1.1-1' }}</span>
+      </span>
+      <input
+        type="range"
+        class="control-range"
+        min="0.1"
+        max="5"
+        step="0.1"
+        [(ngModel)]="steepness"
+        (ngModelChange)="onSteepnessChange($event)"
+      />
+    </label>
+  </aside>
+
   <div #canvasContainer class="canvas-container"></div>
 </div>

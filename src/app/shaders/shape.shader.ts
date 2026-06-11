@@ -1,33 +1,65 @@
 import * as THREE from 'three';
 
 export interface FresnelOptions {
+  baseColor: THREE.ColorRepresentation;
   edgeColor: THREE.ColorRepresentation;
-  fresnelPower: number;
-  fresnelIntensity: number;
+  fresnelStrength: number;
+  edgeAttenuation: number;
+  steepness: number;
 }
 
-export function applyFresnelToPhysicalMaterial(
-  material: THREE.MeshPhysicalMaterial,
-  options: FresnelOptions,
-): void {
-  material.onBeforeCompile = (shader) => {
-    shader.uniforms['uEdgeColor'] = { value: new THREE.Color(options.edgeColor) };
-    shader.uniforms['uFresnelPower'] = { value: options.fresnelPower };
-    shader.uniforms['uFresnelIntensity'] = { value: options.fresnelIntensity };
+const vertexShader = `
+varying vec3 vNormal;
+varying vec3 vWorldPosition;
 
-    shader.fragmentShader = `
-      uniform vec3 uEdgeColor;
-      uniform float uFresnelPower;
-      uniform float uFresnelIntensity;
-    ` + shader.fragmentShader;
+void main() {
+  vNormal = normalize(normalMatrix * normal);
 
-    shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <output_fragment>',
-      `
-        float fresnel = pow(1.0 - saturate(dot(normalize(vNormal), normalize(vViewPosition))), uFresnelPower);
-        outgoingLight = mix(outgoingLight, uEdgeColor, fresnel * uFresnelIntensity);
-        #include <output_fragment>
-      `,
-    );
-  };
+  vec4 worldPos = modelMatrix * vec4(position, 1.0);
+  vWorldPosition = worldPos.xyz;
+
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const fragmentShader = `
+uniform vec3 baseColor;
+uniform vec3 edgeColor;
+uniform float fresnelStrength;
+uniform float edgeAttenuation;
+uniform float steepness;
+
+varying vec3 vNormal;
+varying vec3 vWorldPosition;
+
+void main() {
+  vec3 normal = normalize(vNormal);
+  vec3 viewDir = normalize(cameraPosition - vWorldPosition);
+
+  float fresnel = pow(1.0 - dot(viewDir, normal), edgeAttenuation);
+  fresnel = pow(fresnel, steepness);
+
+  // Sharpen blend so pink + green never pass through muddy yellow mid-tones
+  float rimBlend = clamp(fresnel * fresnelStrength, 0.0, 1.0);
+  rimBlend = rimBlend * rimBlend;
+  vec3 finalColor = mix(baseColor, edgeColor, rimBlend);
+
+  gl_FragColor = vec4(finalColor, 1.0);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+}
+`;
+
+export function createFresnelShaderMaterial(options: FresnelOptions): THREE.ShaderMaterial {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      baseColor: { value: new THREE.Color(options.baseColor) },
+      edgeColor: { value: new THREE.Color(options.edgeColor) },
+      fresnelStrength: { value: options.fresnelStrength },
+      edgeAttenuation: { value: options.edgeAttenuation },
+      steepness: { value: options.steepness },
+    },
+    vertexShader,
+    fragmentShader,
+  });
 }
